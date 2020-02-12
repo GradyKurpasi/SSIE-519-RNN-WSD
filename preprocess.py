@@ -6,6 +6,7 @@ from gensim import utils
 import gensim.models
 from nltk.corpus import semcor
 import pickle
+import random
 import logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
@@ -37,9 +38,9 @@ with tempfile.NamedTemporaryFile(prefix='gensim-model-', delete=False) as tmp:
     temporary_filepath = tmp.name #'C:\\Users\\gkurp\\AppData\\Local\\Temp\\gensim-model-zviw4kpu'
     model.save(temporary_filepath)
 
-# with tempfile.NamedTemporaryFile(prefix='gensim-model-', delete=False) as tmp:
-#     temporary_filepath = 'gensim-model-zviw4kpu'
-#     new_model = gensim.models.Word2Vec.load(temporary_filepath)
+with tempfile.NamedTemporaryFile(prefix='gensim-model-', delete=False) as tmp:
+    temporary_filepath = 'gensim-model-zviw4kpu'
+    new_model = gensim.models.Word2Vec.load(temporary_filepath)
 print('done')
 
 
@@ -123,8 +124,12 @@ with open('lemma.p', 'wb') as f:
      pickle.dump(lemmas, f)
 
 targetsynset = lemmas['back']
+tgtsynsetlist = list(targetsynset)
 with open('targetsynset.p', 'wb') as f:
     pickle.dump(targetsynset, f)
+
+for tgt in targetsynset:
+    print(tgt, targetsynset[tgt])
 
 print("Done")
 
@@ -134,7 +139,7 @@ print("Done")
 # create and store training / test data
 #
 # train / test data is dictionary of 
-# { sentence : index of sense in target synset}
+# { sentence : index of sense in target synset lists}
 
 print("Creating Training/Testing data")
 trainingsentences = {}
@@ -153,12 +158,21 @@ for i, sent in enumerate(targetsentences):
 print(notfound)
 print(len(trainingsentences))
 begintestdata = round(len(trainingsentences) * .75)
+trainingsentenceslist = list(trainingsentences)
+random.shuffle(trainingsentenceslist)
 
-train_data = dict(list(trainingsentences.items())[:begintestdata])
-test_data = dict(list(trainingsentences.items())[begintestdata:])
+randtrainingsentences = {}
+for rs in trainingsentenceslist:
+    randtrainingsentences[rs] = trainingsentences[rs]
+
+train_data = dict(list(randtrainingsentences.items())[:begintestdata])
+test_data = dict(list(randtrainingsentences.items())[begintestdata:])
 with open('train_data.p', 'wb') as f:
     pickle.dump(train_data, f)
 with open('test_data.p', 'wb') as f:
     pickle.dump(test_data, f)
   
+
+for s in train_data:
+    print(s, tgtsynsetlist[train_data[s]])
 print("Done")

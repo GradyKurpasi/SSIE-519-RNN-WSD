@@ -101,7 +101,7 @@ def processData(data, backprop=True):
     loss -= np.log(probs[target])
     num_correct += int(np.argmax(probs) == target)
 
-    if backprop:
+    if backprop:      
       # Build dL/dy
       d_L_d_y = probs
       d_L_d_y[target] -= 1
